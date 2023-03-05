@@ -1,0 +1,154 @@
+//-  This index.pug file displays the map and
+    fetches data from the api.js file when a country is clicked to output
+    latest news headlines. It also fetches data from the Twitter.js file 
+    to display tweets when a news headline is clicked. 
+    The tweets will be based on the keywords found in the clicked 
+    news headline.
+  
+extends layout.pug
+
+block content
+    h1= LatestNewsPage
+
+    #map(style='width: 900px; height: 980px')
+
+    div(class="headlines")= 'Headlines:'
+    p #{count} 
+
+    ul(id="countryNews")
+
+    p(id="headline")= "Headline Clicked"
+
+
+    script(type='text/javascript').
+
+        // An array of coordinates of the five countries
+        const coord = [
+            ["AUSTRALIA", -25.2744,133.7751],
+                ["NEW ZEALAND", -40.9006,174.8860],      
+                ["CANADA", 56.1304,-106.3468],       
+                ["UK", 55.3781,-3.4360],       
+                ["USA", 37.0902,-95.7129]   
+        ];
+
+        // An array of country code of the five countries
+        const countryCodes = new Map([
+            ["AUSTRALIA", "AU"],
+            ["NEW ZEALAND", "NZ"],
+            ["CANADA", "CA"],
+            ["UK", "GB"],
+            ["USA", "US"],
+        ])
+
+        var mapOptions = {
+            center: [40.75042, -73.98928],
+            zoom: 10
+        }
+
+        // The following function fetches the news of the country clicked
+        function renderCountryNews(countryNews) {
+            countryNews.forEach((news) => {
+                console.log(news);
+                const newDiv = document.createElement("button");
+                newDiv.setAttribute("id", news.title);
+                newDiv.setAttribute("class", "newsItem");
+
+                const newContent = document.createTextNode(news.title);
+                const breakLine = document.createElement("br");
+
+                // Add the text node to the newly created div
+                newDiv.appendChild(newContent);
+                newDiv.addEventListener("click", () => myFunction(news.title, news.keywords));
+
+                // Add the newly created element and its content into the DOM
+                const listNode = document.getElementById("countryNews");
+                listNode.insertBefore(newDiv, listNode.children[0]);
+                listNode.insertBefore(breakLine, newDiv);
+            })
+        }
+
+        // The following function fetches the Twitter API
+        function myFunction(title, keywords) {
+            document.getElementById("headline").innerHTML = `You Clicked on: ${title}`;
+            // Call Twitter API
+            window.location.replace(`http://localhost:3001/article/${title}/${keywords}`);
+
+        }
+
+        // The code for the map is from the following codepen example:
+        // https://codepen.io/jamesthomson/pen/BjLGvj
+
+        //Create map object and set default positions and zoom level
+        var map = L.map('map').setView([20, 0], 2);
+        L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png', { attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors' }).addTo(map);
+
+        
+            var Icon = L.icon({
+                iconUrl: 'http://myinspirationinformation.com/wp-content/uploads/2015/12/logoAndName.png',
+                shadowUrl: 'http://leafletjs.com/docs/images/leaf-shadow.png',
+
+                iconSize: [20, 20], // size of the icon
+                //shadowSize:   [50, 64], // size of the shadow
+                iconAnchor: [10, 20], // point of the icon which will correspond to marker's location
+                //shadowAnchor: [4, 62],  // the same for the shadow
+                popupAnchor: [0, -10] // point from which the popup should open relative to the iconAnchor
+        });
+
+        // The following code iterates through coord array
+        for (var i = 0; i < coord.length; i++) {
+            var marker = L.marker([coord[i][1], coord[i][2]], {icon: Icon}).addTo(map);
+            marker.on('click', async function(e) {
+
+                const coordinate = markerClicked(e);
+                console.log("coordinate: ", coordinate);
+                const countryName = getCountryName(coordinate);
+
+                const countryCode = getCountryCode(countryName);
+
+                const headlines = await getHeadlines(countryCode);
+
+            });
+
+        }
+
+        // The following function compares the coord values to get the 
+        // country name 
+        function getCountryName(coordinate) {
+            let res = "";
+            coord.forEach(coord => {
+                if(coord[1] == coordinate[0] && coord[2] == coordinate[1]) {
+                    res = coord[0];
+                }
+            })
+            return res;
+        }
+
+        // The following function provides country code based on the country name
+        function getCountryCode(countryName) {
+            return countryCodes.get(countryName);
+        }
+
+        // The following function outputs the latitude and longitude of
+        // the clicked country
+        function markerClicked(e) {
+            var coord=e.latlng.toString().split(',');
+            var lat=coord[0].split('(');
+            var long=coord[1].split(')');
+            return [lat[1],long[0]];
+        }
+
+        // The following function fetches the latest news from the api.js file
+       const getHeadlines = async (countryCode) => {
+        console.log("CountryCode", countryCode);
+         const response = await fetch(`/news/latestNews/${countryCode}`);
+         console.log(response);
+         const data = await response.json();
+         console.log("dataJson: ", data.countryNews);
+         countryNews = data.countryNews;
+         renderCountryNews(countryNews);
+        } 
+
+    
+
+
+

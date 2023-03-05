@@ -1,0 +1,40 @@
+/* This file contains styles for the homepage and tweets page */
+
+body {
+  padding: 50px;
+  font: 20px  Arial
+}
+
+a {
+  color: #00B7FF;
+}
+
+/* Styles for the news headlines buttons*/
+button{
+  background-color:  blanchedalmond; 
+  border-radius: 8px;
+  border: solid;
+  color: black;
+  padding: 12px;
+  padding-bottom: 10px;
+  margin-bottom: 10px;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  font-size: 14px;
+}
+
+button:hover {background-color: whitesmoke}
+
+/* Styles for the text of the news headlines buttons */
+.headlines{
+  margin: 30px;
+  text-align: center;
+  font-size: 20px;
+  
+}
+
+
+h2{
+  text-align: center;
+}

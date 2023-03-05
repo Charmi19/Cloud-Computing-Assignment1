@@ -1,0 +1,2 @@
+# node_modules will not be pushed during docker push command
+node_modules

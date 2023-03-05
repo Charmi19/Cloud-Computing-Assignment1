@@ -1,0 +1,23 @@
+doctype html
+html
+  head
+    title Tweets Page
+  body
+    <h2>Welcome to the Tweets Page</h2>
+    <h3>The table below shows all the available tweets and provides a score</h3>
+    
+   
+    ul(id="tweets")
+    
+    table(id="tweets", style='width:100%', border='1')
+      tr
+        th Tweet
+        th Score
+      each tweet in tweets
+        tr
+          td=tweet.tweet
+          td=tweet.score
+      
+    block content
+
+
